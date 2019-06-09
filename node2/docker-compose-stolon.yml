@@ -1,0 +1,24 @@
+version: '3.4'
+
+services:
+  sentinel:
+    image: sorintlab/stolon:master-pg10
+    command: gosu stolon stolon-sentinel --cluster-name stolon-cluster --store-backend=etcdv3 --store-endpoints http://node-1.uggla.fr:2379,http://node-2.uggla.fr:2379,http://node-3.uggla.fr:2379 --log-level debug
+
+  keeper:
+    image: sorintlab/stolon:master-pg10
+    hostname: node-2.uggla.fr
+    environment:
+      - PGDATA=/var/lib/postgresql/data
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+        #command: gosu stolon stolon-keeper --pg-listen-address node-1 --pg-repl-username replication --uid keeper --pg-su-username postgres --pg-su-passwordfile /run/secrets/pgsql --pg-repl-passwordfile /run/secrets/pgsql_repl --data-dir /var/lib/postgresql/data --cluster-name stolon-cluster --store-backend=etcdv3 --store-endpoints http://node-1.uggla.fr:2379,http://node-2.uggla.fr:2379,http://node-3.uggla.fr:2379 --log-level debug
+    command: gosu stolon stolon-keeper --pg-listen-address node-2.uggla.fr --pg-repl-username replication --uid keeper --pg-su-username postgres --pg-su-password postgres --pg-repl-password replication --data-dir /var/lib/postgresql/data --cluster-name stolon-cluster --store-backend=etcdv3 --store-endpoints http://node-1.uggla.fr:2379,http://node-2.uggla.fr:2379,http://node-3.uggla.fr:2379 --log-level debug
+    ports:
+      - 5432:5432
+
+  proxy:
+    image: sorintlab/stolon:master-pg10
+    command: gosu stolon stolon-proxy --listen-address 0.0.0.0 --port 15432 --cluster-name stolon-cluster --store-backend=etcdv3 --store-endpoints http://node-1.uggla.fr:2379,http://node-2.uggla.fr:2379,http://node-3.uggla.fr:2379 --log-level info
+    ports:
+      - 15432:15432

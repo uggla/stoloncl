@@ -1,0 +1,5 @@
+logs
+*.swp
+pgdata
+data
+init.done

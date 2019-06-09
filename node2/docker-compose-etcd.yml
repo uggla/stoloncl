@@ -1,0 +1,23 @@
+version: '3.4'
+
+services:
+  etcd:
+    image: quay.io/coreos/etcd:v3.3.12
+    hostname: node-2.uggla.fr
+    command:
+      - etcd
+      - --name=node-2.uggla.fr
+      - --data-dir=data.etcd
+      - --advertise-client-urls=http://node-2.uggla.fr:2379
+      - --listen-client-urls=http://0.0.0.0:2379
+      - --initial-advertise-peer-urls=http://node-2.uggla.fr:2380
+      - --listen-peer-urls=http://0.0.0.0:2380
+      - --initial-cluster=node-1.uggla.fr=http://node-1.uggla.fr:2380,node-2.uggla.fr=http://node-2.uggla.fr:2380,node-3.uggla.fr=http://node-3.uggla.fr:2380
+      - --initial-cluster-state=new
+      - --initial-cluster-token=blabla
+    volumes:
+      - ./data:/data.etcd
+    ports:
+      - 2379:2379
+      - 2380:2380
+
